@@ -19,4 +19,4 @@ data_dir=sys.argv[1]
 with open ("{}/titles.temp".format(data_dir), "r") as fh_in, open ("{}/titles.txt".format(data_dir),"w") as outF:
     # Read each line in loop
     for line in fh_in:
-        outF.write( unicodeToAscii(line) +"\n")
+        outF.write( unicodeToAscii(line).lower() +"\n")
