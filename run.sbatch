@@ -6,5 +6,5 @@
 #SBATCH --gres=gpu:p100:1
 
 module load python-env/3.6.3-ml
-python3 main.py 
+python3 create_embeddings.py
 
