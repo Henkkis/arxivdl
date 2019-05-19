@@ -31,6 +31,11 @@ for i in range(0,10):
 
     pred_category =  int(idx.data.tolist()[0][0])
 
+    # Human readable output for convinience
     print("----------------------------")
     print("SENTENCE: ",sentences[index], "PREDICTED CATEGORY: ",pred_category, "RIGHT CATEGORY: ", categories[index], "INDEX IN DATA: ",index )
     print("----------------------------")
+
+
+    # Raw output for postprocessing (set the range for the foor loop to something large eg. 7000 to do some statistics)
+    #print(pred_category,categories[index])
