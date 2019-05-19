@@ -3,6 +3,8 @@ import random
 import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
+import pickle
+
 from my_util import *
 
 categories=readLinesC("ParsedData/categories.txt")
@@ -34,14 +36,14 @@ class MLP(nn.Module):
         self.net = nn.Sequential(
             nn.Linear(input_size, 200),
             nn.Tanh(),
-            nn.Conv1d(1, 4, 1),
+            nn.Conv1d(1, 6, 1),
             nn.Linear(200, 100),
             nn.Tanh(),
-            nn.Dropout(0.03),
+            nn.Dropout(0.04),
             nn.Linear(100, 50),
             nn.Tanh(),
-            nn.Dropout(0.03),
-            nn.Conv1d(4, 1, 1),
+            nn.Dropout(0.04),
+            nn.Conv1d(6, 1, 1),
             nn.Linear(50, output_size),
             nn.LogSoftmax(dim=2)
             )
@@ -52,7 +54,7 @@ class MLP(nn.Module):
 network =MLP(encoding_size,num_categories)
 network.to(device)
 network = network.cuda()
-optimizer = torch.optim.Adam(network.parameters(), lr=0.0004)
+optimizer = torch.optim.Adam(network.parameters(), lr=0.0002)
 
 
 
@@ -68,13 +70,20 @@ test_indices = total_indices[0:int(num_titles/10)]
 validation_indices = total_indices[int(num_titles/10):int(num_titles/10)*3]
 training_indices = total_indices[int(num_titles/10)*3:]
 
+with open('test_indices', 'wb') as fp:
+    pickle.dump(test_indices, fp)
+
+
+
+
+
 criterion   = nn.NLLLoss()
 print("Starting training")
 
 # Training
 running_loss=0
 best_loss = 100
-grace = 3
+grace = 5
 for epoch in range(n_epochs):
 
     if(grace == 0):
@@ -109,4 +118,4 @@ for epoch in range(n_epochs):
         running_loss=0
 
 
-
+torch.save(network.state_dict(),"trained_model")
