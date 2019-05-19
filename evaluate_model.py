@@ -7,12 +7,16 @@ from parameters import *
 import numpy as np
 import torch
 
+
+# Read our data and embeddings
 categories=readLinesC("ParsedData/categories.txt")
 sentences=readLines("ParsedData/titles.txt")
 num_titles=len(categories)
 embeddings=np.load("saved_embeddings.npy")
 X=[ [embeddings[i][:]] for i in range(0,num_titles)  ]
 X = torch.tensor(X)
+
+# Load the trained network
 network_state = torch.load("trained_model",map_location='cpu')
 network =MLP(encoding_size,num_categories)
 network.load_state_dict(network_state)
