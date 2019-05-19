@@ -12,15 +12,12 @@ from my_util import *
 # Load our categories and saved embeddings from running create_embeddings.py
 categories=readLinesC("ParsedData/categories.txt")
 embeddings=np.load("saved_embeddings.npy")
-
-
-
-
 num_titles=len(categories)
 
+
+
+# Use a gpu and convert data to tensors
 device = torch.device("cuda")
-
-
 X=[ [embeddings[i][:]] for i in range(0,num_titles)  ]
 Y=[[int(i)] for i in categories]
 X = torch.tensor(X,device=device)
@@ -29,22 +26,22 @@ Y= torch.tensor(Y,device=device)
 
 
 
-
+# Create the network
 network =MLP(encoding_size,num_categories)
 network.to(device)
 network = network.cuda()
 optimizer = torch.optim.Adam(network.parameters(), lr=0.0002)
+criterion   = nn.NLLLoss()
 
 
-
+# Split the data to training, validation and test data sets
 total_indices = [i for i in range(0,num_titles)]
-
-
 random.shuffle(total_indices)
 test_indices = total_indices[0:int(num_titles/10)]
 validation_indices = total_indices[int(num_titles/10):int(num_titles/10)*3]
 training_indices = total_indices[int(num_titles/10)*3:]
 
+# Save the indices for the test data so we can use them when we test our accuracy
 with open('test_indices', 'wb') as fp:
     pickle.dump(test_indices, fp)
 
@@ -52,10 +49,8 @@ with open('test_indices', 'wb') as fp:
 
 
 
-criterion   = nn.NLLLoss()
+# Training loop
 print("Starting training")
-
-# Training
 running_loss=0
 best_loss = 100
 grace = 5
