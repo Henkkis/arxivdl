@@ -38,8 +38,8 @@ cd $parsed_data_folder
 
 simple_category_file="categories.txt"
 simple_title_file="titles.txt"
-python "$script_folder/"simplify_categories.py $parsed_data_folder
-python "$script_folder/"convert_title.py $parsed_data_folder
+python3 "$script_folder/"simplify_categories.py $parsed_data_folder
+python3 "$script_folder/"convert_title.py $parsed_data_folder
 rm -f $title_file
 rm -f $category_file
 

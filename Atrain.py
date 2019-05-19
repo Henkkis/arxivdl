@@ -1,9 +1,10 @@
 import torch
 import random
+import pickle
+from network_def import *
+from parameters import *
 import numpy as np
 import torch.nn as nn
-import torch.nn.functional as F
-import pickle
 
 from my_util import *
 
@@ -14,11 +15,6 @@ embeddings=np.load("saved_embeddings.npy")
 
 
 num_titles=len(categories)
-num_categories=6
-encoding_size=4096
-batch_size=512
-validation_size=128
-n_epochs=15000
 
 device = torch.device("cuda")
 #device =torch.device("cpu")
