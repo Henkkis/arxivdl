@@ -13,7 +13,6 @@ from models import InferSent
 
 sentences=readLines("ParsedData/titles.txt")
 categories=readLinesC("ParsedData/categories.txt")
-# merged_list = [(sentences[i][j] ,categories[i]) for i in range(0,len(categories)) for j in range(0,len(sentences[i]))  ]
 
 
 
