@@ -6,5 +6,5 @@
 #SBATCH --gres=gpu:k80:1
 
 module load python-env/3.6.3-ml
-python3 Atrain.py
+srun --unbuffered python3 Atrain.py
 
