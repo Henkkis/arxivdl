@@ -14,8 +14,9 @@ embeddings=np.load("saved_embeddings.npy")
 num_titles=len(categories)
 num_categories=6
 encoding_size=4096
-batch_size=128
-
+batch_size=512
+validation_size=128
+n_epochs=15000
 
 device = torch.device("cuda")
 #device =torch.device("cpu")
@@ -31,12 +32,18 @@ class MLP(nn.Module):
     def __init__(self,input_size,output_size):
         super(MLP, self).__init__()
         self.net = nn.Sequential(
-            nn.Linear(input_size, 100),
-            nn.ReLU(),
-            nn.Linear(100, 100),
-            nn.ReLU(),
-            nn.Linear(100, output_size),
-            nn.LogSoftmax(dim=0)
+            nn.Linear(input_size, 200),
+            nn.Tanh(),
+            nn.Conv1d(1, 4, 1),
+            nn.Linear(200, 100),
+            nn.Tanh(),
+            nn.Dropout(0.03),
+            nn.Linear(100, 50),
+            nn.Tanh(),
+            nn.Dropout(0.03),
+            nn.Conv1d(4, 1, 1),
+            nn.Linear(50, output_size),
+            nn.LogSoftmax(dim=2)
             )
 
     def forward(self, x):
@@ -45,7 +52,7 @@ class MLP(nn.Module):
 network =MLP(encoding_size,num_categories)
 network.to(device)
 network = network.cuda()
-
+optimizer = torch.optim.Adam(network.parameters(), lr=0.0004)
 
 
 
@@ -60,15 +67,46 @@ random.shuffle(total_indices)
 test_indices = total_indices[0:int(num_titles/10)]
 validation_indices = total_indices[int(num_titles/10):int(num_titles/10)*3]
 training_indices = total_indices[int(num_titles/10)*3:]
-print(test_indices)
 
+criterion   = nn.NLLLoss()
+print("Starting training")
 
+# Training
+running_loss=0
+best_loss = 100
+grace = 3
+for epoch in range(n_epochs):
 
+    if(grace == 0):
+        print("Early stopping")
+        break
 
-#output = network.forward(X[0:10]).view(-1,num_categories,1)
-#target = Y[0:10]
-#criterion   = nn.NLLLoss()
-#loss = criterion(output,target)
+    train_selection = random.choices(training_indices, k=batch_size)
+    train_inputs = torch.stack([X[i] for i in train_selection ])
+    train_output = network.forward(train_inputs).view(-1,num_categories,1)
+    train_target = torch.stack([Y[i] for i in train_selection ])
+
+    optimizer.zero_grad()
+    train_loss = criterion(train_output,train_target)
+    train_loss.backward()
+    optimizer.step()
+
+    running_loss += train_loss.item()
+
+    if(epoch % 500 == 0):
+        val_selection = random.choices(validation_indices, k=validation_size)
+        val_inputs = torch.stack([X[i] for i in val_selection ])
+        val_output = network.forward(val_inputs).view(-1,num_categories,1)
+        val_target = torch.stack([Y[i] for i in val_selection ])
+        val_loss = criterion(val_output,val_target)
+        if(val_loss > best_loss):
+            grace -=1
+        else:
+            grace=6
+            best_loss=val_loss
+
+        print("Training Loss: ",running_loss/500, "Validation Loss: ", val_loss.item(),  "Epoch:", epoch)
+        running_loss=0
 
 
 
